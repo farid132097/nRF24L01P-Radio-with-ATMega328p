@@ -2,9 +2,17 @@
 
 /*
 
+Default PIN connections:
+NRF SCK  -> ATmega328P PB5 (Hardware SPI pin, can't be changed)
+NRF MISO -> ATmega328P PB4 (Hardware SPI pin, can't be changed)
+NRF MOSI -> ATmega328P PB3 (Hardware SPI pin, can't be changed)
+NRF CSN  -> ATmega328P PD6 (Configureable, see below definitions)
+NRF CE   -> ATmega328P PD5 (Configureable, see below definitions)
+
+
 RF FUNCTIONS USED:
 
-void    RF_START(set_rf_channel)
+void    RF_START(set_rf_channel)  
 void    RF_SLEEP(void)
 void    RF_WAKE_UP(void)
 void    RF_TX_TEXT(char_buffer)
@@ -27,15 +35,15 @@ uint8_t RF_RX_GET_ACK_PACKET(rx_buf, get_rx_data_len, tx_buf, set_tx_data_len)
 
 
 //Configure this section//
-#define  CSN_DDR           DDRD
-#define  CSN_PORT          PORTD  
-#define  CSN               6      
+#define  CSN_DDR           DDRD   /*Change CSN Data direction if necessary*/
+#define  CSN_PORT          PORTD  /*Change CSN port if necessary*/
+#define  CSN               6      /*Change CSN pin number if necessary*/
 
-#define  CE_DDR            DDRD   
-#define  CE_PORT           PORTD  
-#define  CE                5        
+#define  CE_DDR            DDRD   /*Change CE Data direction if necessary*/
+#define  CE_PORT           PORTD  /*Change CE port if necessary*/
+#define  CE                5      /*Change CE pin number if necessary*/
 
-#define  OWN_ADDR          0x11
+#define  OWN_ADDR          0x11   /*Change Node Address*/
 //Configure this section//
 
 
@@ -80,15 +88,15 @@ uint8_t RF_RX_GET_ACK_PACKET(rx_buf, get_rx_data_len, tx_buf, set_tx_data_len)
 #define  RF_Enable()       SCK_DDR|=(1<<SCK);MISO_DDR&=~(1<<MISO);\
                            MOSI_DDR|=(1<<MOSI);MCU_SS_DDR|=(1<<MCU_SS);\
                            CSN_DDR|=(1<<CSN);CE_DDR|=(1<<CE);\
-					       CSN_PORT|=(1<<CSN);CE_PORT&=~(1<<CE);\
-					       SPCR=(1<<SPE)|(1<<MSTR);SPSR=(1<<SPI2X);
+			   CSN_PORT|=(1<<CSN);CE_PORT&=~(1<<CE);\
+			   SPCR=(1<<SPE)|(1<<MSTR);SPSR=(1<<SPI2X);
 
 #define  RF_Disable()      SPCR=0x00;SCK_DDR|=(1<<SCK);\
                            MISO_DDR|=(1<<MISO);MOSI_DDR|=(1<<MOSI);\
-					       MCU_SS_DDR|=(1<<MCU_SS);CSN_DDR|=(1<<CSN);\
-					       CE_DDR|=(1<<CE);\
-					       SCK_PORT&=~(1<<SCK);MISO_PORT&=~(1<<MISO);\
-					       MOSI_PORT&=~(1<<MOSI);MCU_SS_PORT&=~(1<<MCU_SS);\
+			   MCU_SS_DDR|=(1<<MCU_SS);CSN_DDR|=(1<<CSN);\
+			   CE_DDR|=(1<<CE);\
+			   SCK_PORT&=~(1<<SCK);MISO_PORT&=~(1<<MISO);\
+			   MOSI_PORT&=~(1<<MOSI);MCU_SS_PORT&=~(1<<MCU_SS);\
                            CSN_PORT&=~(1<<CSN);CE_PORT&=~(1<<CE);\
 
 typedef struct{
