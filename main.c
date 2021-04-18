@@ -8,15 +8,15 @@
 
 int main(void){
 
-RF_START(2);
+RF_START(2); // set channel number
 
 while(1){
            
-           RF_WAKE_UP();
-		   RF_TX_TEXT("nRF24L01+ UD");
-		   RF_SLEEP();
+           RF_WAKE_UP(); //optional if you don't care power consumption
+           RF_TX_TEXT("nRF24L01+ UD");
+	   RF_SLEEP();   //optional if you don't care power consumption
 		   
-		   _delay_ms(500);
+           _delay_ms(500);
 		   
-		   }
+        }
 }
