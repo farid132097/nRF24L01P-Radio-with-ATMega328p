@@ -100,15 +100,15 @@ uint8_t      tx_retry             max retries when no acknowledgement received (
 #define  RF_Enable()       SCK_DDR|=(1<<SCK);MISO_DDR&=~(1<<MISO);\
                            MOSI_DDR|=(1<<MOSI);MCU_SS_DDR|=(1<<MCU_SS);\
                            CSN_DDR|=(1<<CSN);CE_DDR|=(1<<CE);\
-			   CSN_PORT|=(1<<CSN);CE_PORT&=~(1<<CE);\
-			   SPCR=(1<<SPE)|(1<<MSTR);SPSR=(1<<SPI2X);
+			               CSN_PORT|=(1<<CSN);CE_PORT&=~(1<<CE);\
+			               SPCR=(1<<SPE)|(1<<MSTR);SPSR=(1<<SPI2X);
 
 #define  RF_Disable()      SPCR=0x00;SCK_DDR|=(1<<SCK);\
                            MISO_DDR|=(1<<MISO);MOSI_DDR|=(1<<MOSI);\
-			   MCU_SS_DDR|=(1<<MCU_SS);CSN_DDR|=(1<<CSN);\
-			   CE_DDR|=(1<<CE);\
-			   SCK_PORT&=~(1<<SCK);MISO_PORT&=~(1<<MISO);\
-			   MOSI_PORT&=~(1<<MOSI);MCU_SS_PORT&=~(1<<MCU_SS);\
+			               MCU_SS_DDR|=(1<<MCU_SS);CSN_DDR|=(1<<CSN);\
+			               CE_DDR|=(1<<CE);\
+			               SCK_PORT&=~(1<<SCK);MISO_PORT&=~(1<<MISO);\
+			               MOSI_PORT&=~(1<<MOSI);MCU_SS_PORT&=~(1<<MCU_SS);\
                            CSN_PORT&=~(1<<CSN);CE_PORT&=~(1<<CE);\
 
 typedef struct{
