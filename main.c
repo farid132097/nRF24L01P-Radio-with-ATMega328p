@@ -18,17 +18,17 @@ while(1){
            RF_TX_TEXT("nRF24L01+ Says Hello!");   
            _delay_ms(500);
 	
-	/*
-	  //for Receiver Node uncomment this section
+	  /*
+	  //for Receiver Node uncomment below section
 	  
 	  uint8_t rx_buf[32],rx_data_len=0;
 		   
-          if(RF_RX(rx_buf,&rx_data_len)){
+          if(RF_RX(rx_buf,&rx_data_len,1,0)){
 	      //received data in 'rx_buf' buffer
               //do your stuff after receiving
 	     }
 	  _delay_ms(1);
-        */
+      */
 		   
         }
 }
