@@ -17,8 +17,7 @@ void    RF_SLEEP(void)
 void    RF_WAKE_UP(void)
 void    RF_TX_TEXT(char_buffer)
 uint8_t RF_TX(tx_buf, set_tx_data_len, set_rx_addr)
-uint8_t RF_RX(rx_buf, get_rx_data_len)
-uint8_t RF_RX_TIMEOUT(rx_buf, get_rx_data_len, rx_timeout, rx_buf_flush)
+uint8_t RF_RX(rx_buf, get_rx_data_len, rx_timeout, rx_buf_flush)
 uint8_t RF_TX_ACK(tx_buf, set_tx_data_len, set_rx_addr, tx_retry)
 uint8_t RF_RX_ACK(rx_buf, get_rx_data_len)
 uint8_t RF_TX_GET_ACK_PACKET(tx_buf, set_tx_data_len, rx_buf, get_rx_data_len, set_rx_addr, tx_retry)
@@ -121,7 +120,8 @@ rf_params rf;
 
 uint8_t SPI_TRX(uint8_t data){
 SPDR = data;
-while(!(SPSR & (1 << SPIF)));
+uint16_t ticks=0;
+while(!(SPSR & (1 << SPIF))){_delay_us(1);ticks++;if(ticks>5000){break;}}
 return SPDR;
 }
 
@@ -160,34 +160,24 @@ RF_Enable();
 RF_PWR(RX);
 }
 
-void RF_START(uint8_t chnl){
+void RF_START(uint8_t channel){
 rf.tpid=0;
 rf.rpid=0;
 RF_Enable();
-uint8_t buf[5];
-buf[0]=0x00;  RF_RW_REG(0x00,WRITE,buf,1);
-buf[0]=0x00;  RF_RW_REG(0x01,WRITE,buf,1);
-buf[0]=0x03;  RF_RW_REG(0x02,WRITE,buf,1);
-buf[0]=0x01;  RF_RW_REG(0x03,WRITE,buf,1);
-buf[0]=0x00;  RF_RW_REG(0x04,WRITE,buf,1);
-buf[0]=chnl;  RF_RW_REG(0x05,WRITE,buf,1);
-buf[0]=0x26;  RF_RW_REG(0x06,WRITE,buf,1);
-buf[0]=0x70;  RF_RW_REG(0x07,WRITE,buf,1);
-buf[0]=32;    RF_RW_REG(0x11,WRITE,buf,1);
-buf[0]=32;    RF_RW_REG(0x12,WRITE,buf,1); 
-buf[0]=0x00;  RF_RW_REG(0x13,WRITE,buf,1);
-buf[0]=0x00;  RF_RW_REG(0x14,WRITE,buf,1);
-buf[0]=0x00;  RF_RW_REG(0x15,WRITE,buf,1);
-buf[0]=0x00;  RF_RW_REG(0x16,WRITE,buf,1);
-buf[0]=0x00;  RF_RW_REG(0x1C,WRITE,buf,1);
-buf[0]=0x00;  RF_RW_REG(0x1D,WRITE,buf,1);
-RF_RW_REG(0x10,WRITE,(uint8_t*)"ACK",5);   
-RF_RW_REG(0x0A,WRITE,(uint8_t*)"ACK",5);
-RF_RW_REG(0x0B,WRITE,(uint8_t*)"DP1",5);
-RF_RW_REG(0xE1,WRITE,buf,0);
-RF_RW_REG(0xE2,WRITE,buf,0);
-_delay_ms(20);
-RF_PWR(DOWN);
+uint8_t rf_config[20]={0x00,0x00,0x03,0x01,0x00,channel,0x26,0x70,0x20,0x20,
+                       0x00,0x00,0x00,0x00,0x00,0x00,'A','A',0xE1,0xE2};
+uint8_t index=0,bytes=1,buf[5];
+buf[1]='C';buf[2]='K';
+for(uint8_t addr=0;addr<=0xE2;addr++){
+  if     (addr==0x08){addr=0x11;}
+  else if(addr==0x17){addr=0x1C;}
+  else if(addr==0x1E){addr=0x0A;bytes=5;}
+  else if(addr==0x0B){addr=0x10;bytes=5;}
+  else if(addr==0x11){addr=0xE1;bytes=0;}
+  buf[0]=rf_config[index];
+  RF_RW_REG(addr,WRITE,buf,bytes);
+  index++;
+ }
 RF_PWR(RX);
 }
 
@@ -213,57 +203,30 @@ return crc;
 }
 
 
-uint8_t RF_RX(uint8_t *buf, uint8_t *len){
-RF_PWR(RX);
-_delay_us(200);
-uint8_t  sts=0,temp[2]; uint16_t crc=0;
-RF_RW_REG(0x07,READ,temp,1);
-uint8_t data_pipe=(temp[0] & 0x0E)>>1;
-if(data_pipe<6){
-  RF_RW_REG(0x17,READ,temp,1);
-  if(!(temp[0] & 0x01)){
-    RF_RW_REG(0x11+data_pipe,READ,temp,1);
-    RF_RW_REG(0x61,READ,buf,temp[0]);
-    for(uint8_t i=0;i<30;i++){crc=CRC16(crc,buf[i]);}
-	uint16_t calc_crc=buf[CRC_MSBYTE_POS];
-	calc_crc=calc_crc<<8;
-	calc_crc|=buf[CRC_LSBYTE_POS];
-    if(crc==calc_crc){*len=(buf[LEN_BYTE_POS] & 0x1F);sts=1;}
-    }
-  }
-return sts;
-}
-
-
-uint8_t RF_RX_TIMEOUT(uint8_t *buf, uint8_t *len, uint16_t timeout, uint8_t flush){
+uint8_t RF_RX(uint8_t *buf, uint8_t *len, uint16_t timeout,uint8_t flush){
 RF_PWR(RX);
 uint8_t dummy[2];
 if(flush){RF_RW_REG(0xE2,WRITE,dummy,0);}
-uint16_t ticks=0,sts=0,tmout=timeout*10;
+uint16_t ticks=0,sts=0;
 
-while(ticks<tmout){
- sts=0; uint8_t temp[2]; uint16_t crc=0;
- RF_RW_REG(0x07,READ,temp,1);
- uint8_t data_pipe=(temp[0] & 0x0E)>>1;
- if(data_pipe<6)
- {
-    RF_RW_REG(0x17,READ,temp,1);
-    if(!(temp[0] & 0x01))
+while(ticks<timeout){
+sts=0; uint8_t temp[2]; uint16_t crc=0;
+RF_RW_REG(0x17,READ,temp,1);
+if(!(temp[0] & 0x01))
     {
-       RF_RW_REG(0x11+data_pipe,READ,temp,1);
-       RF_RW_REG(0x61,READ,buf,temp[0]);
+       RF_RW_REG(0x61,READ,buf,32);
        for(uint8_t i=0;i<30;i++){crc=CRC16(crc,buf[i]);}
 	   uint16_t calc_crc=buf[CRC_MSBYTE_POS];
 	   calc_crc=calc_crc<<8;
 	   calc_crc|=buf[CRC_LSBYTE_POS];
        if(crc==calc_crc){*len=(buf[LEN_BYTE_POS] & 0x1F);sts=1;break;}
     }
-  }
   _delay_us(85);
   ticks++;
  }
 return sts;
 }
+
 
 uint8_t RF_TX_ACK(uint8_t *tbuf, uint8_t tlen, uint8_t rx_addr,uint8_t retry){
 rf.tpid++;
@@ -271,7 +234,7 @@ if(rf.tpid>7){rf.tpid=0;}
 uint8_t sts=0,rty=0,temp_len=0,temp_pid=(rf.tpid<<5),rbuf[32];
 while(rty<retry){
   RF_TX(tbuf,tlen|temp_pid,rx_addr);
-  if(RF_RX_TIMEOUT(rbuf,&temp_len,ACK_WAIT_MS,0)){
+  if(RF_RX(rbuf,&temp_len,(ACK_WAIT_MS*10),0)){
     if((rbuf[RX_ADDR_BYTE_POS]==OWN_ADDR)&&(rf.tpid==(rbuf[LEN_BYTE_POS]>>5))){
 	   sts=1;
 	   break;
@@ -284,7 +247,7 @@ return sts;
 
 uint8_t RF_RX_ACK(uint8_t *rbuf, uint8_t *rlen){
 uint8_t sts=0,temp_len=0,temp_pid=0,tbuf[32],tlen=0;
-if(RF_RX(rbuf,&temp_len)){
+if(RF_RX(rbuf,&temp_len,1,0)){
    if((rbuf[RX_ADDR_BYTE_POS]==OWN_ADDR)||(rbuf[RX_ADDR_BYTE_POS]==GENERAL_CALL)){
      _delay_us(500);
      temp_pid=(rbuf[LEN_BYTE_POS] & 0xE0)>>5;
@@ -297,13 +260,14 @@ if(RF_RX(rbuf,&temp_len)){
 return sts;
 }
 
+
 uint8_t RF_TX_GET_ACK_PACKET(uint8_t *tbuf, uint8_t tlen, uint8_t *rbuf, uint8_t *rlen, uint8_t rx_addr,uint8_t retry){
 rf.tpid++;
 if(rf.tpid>7){rf.tpid=0;}
 uint8_t sts=0,rty=0,temp_len=0,temp_pid=(rf.tpid<<5);
 while(rty<retry){
   RF_TX(tbuf,tlen|temp_pid,rx_addr);
-  if(RF_RX_TIMEOUT(rbuf,&temp_len,ACK_WAIT_MS,0)){
+  if(RF_RX(rbuf,&temp_len,(ACK_WAIT_MS*10),0)){
     if((rbuf[RX_ADDR_BYTE_POS]==OWN_ADDR)&&(rf.tpid==(rbuf[LEN_BYTE_POS]>>5))){
 	   *rlen=temp_len;
 	   sts=1;
@@ -318,7 +282,7 @@ return sts;
 
 uint8_t RF_RX_GET_ACK_PACKET(uint8_t *rbuf, uint8_t *rlen, uint8_t *tbuf, uint8_t tlen){
 uint8_t sts=0,temp_len=0,temp_pid=0;
-if(RF_RX(rbuf,&temp_len)){
+if(RF_RX(rbuf,&temp_len,1,0)){
    if((rbuf[RX_ADDR_BYTE_POS]==OWN_ADDR)||(rbuf[RX_ADDR_BYTE_POS]==GENERAL_CALL)){
      _delay_us(500);
      temp_pid=(rbuf[LEN_BYTE_POS] & 0xE0)>>5;
