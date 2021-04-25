@@ -35,7 +35,7 @@ uint8_t      rx_buf               uint8_t type array (must be 32 bytes long)
 uint8_t      set_tx_data_len      single byte (max value 26)
 *uint8_t     get_rx_data_len      single byte (use &variable)
 uint8_t      set_rx_addr          device address which will receive data; single byte (max value 255)
-uint16_t     rx_timeout           set timeout in 0.1ms (max value 65535)
+uint16_t     rx_timeout           set timeout in ms (max value 6500)
 uint16_t     rx_buf_flush         boolean input (to flush every time before checking new data set it 1)
 uint8_t      tx_retry             max retries when no acknowledgement received (max value 255)
 */
@@ -187,7 +187,6 @@ uint8_t RF_TX(uint8_t *buf, uint8_t len, uint8_t rx_addr){
 RF_PWR(TX);
 uint8_t  temp[32],temp_len=(len & 0x1F); uint16_t crc=0;
 RF_RW_REG(0xE1,WRITE,temp,0);
-for(uint8_t i=0;i<32;i++){temp[i]=' ';}
 for(uint8_t i=0;i<temp_len;i++){temp[i]=buf[i];}
 temp[OWN_ADDR_BYTE_POS]=OWN_ADDR;
 temp[RX_ADDR_BYTE_POS]=rx_addr;temp[LEN_BYTE_POS]=len;
