@@ -49,66 +49,65 @@ uint8_t      tx_retry             max retries when no acknowledgement received (
 
 
 
-#define  CSN_DDR           DDRD   /* Change CSN Data direction if necessary */
-#define  CSN_PORT          PORTD  /* Change CSN port if necessary */
-#define  CSN               6      /* Change CSN pin number if necessary */
+#define  RF_CSN_DDR        DDRD   /* Change CSN Data direction if necessary */
+#define  RF_CSN_PORT       PORTD  /* Change CSN port if necessary */
+#define  RF_CSN            6      /* Change CSN pin number if necessary */
 
-#define  CE_DDR            DDRD   /* Change CE Data direction if necessary */
-#define  CE_PORT           PORTD  /* Change CE port if necessary */
-#define  CE                5      /* Change CE pin number if necessary */
+#define  RF_CE_DDR         DDRD   /* Change CE Data direction if necessary */
+#define  RF_CE_PORT        PORTD  /* Change CE port if necessary */
+#define  RF_CE             5      /* Change CE pin number if necessary */
 
-#define  OWN_ADDR          0x11   /* Change Node Address */
+#define  RF_OWN_ADDR       0x11   /* Change Node Address */
 
 
 
-#define  SCK_DDR           DDRB   /* Do not change */
-#define  SCK_PORT          PORTB  /* Do not change */
-#define  SCK               5      /* Do not change */
+#define  RF_SCK_DDR        DDRB   /* Do not change */
+#define  RF_SCK_PORT       PORTB  /* Do not change */
+#define  RF_SCK            5      /* Do not change */
 
-#define  MISO_DDR          DDRB   /* Do not change */
-#define  MISO_PORT         PORTB  /* Do not change */
-#define  MISO              4      /* Do not change */
+#define  RF_MISO_DDR       DDRB   /* Do not change */
+#define  RF_MISO_PORT      PORTB  /* Do not change */
+#define  RF_MISO           4      /* Do not change */
 
-#define  MOSI_DDR          DDRB   /* Do not change */
-#define  MOSI_PORT         PORTB  /* Do not change */
-#define  MOSI              3      /* Do not change */
+#define  RF_MOSI_DDR       DDRB   /* Do not change */
+#define  RF_MOSI_PORT      PORTB  /* Do not change */
+#define  RF_MOSI           3      /* Do not change */
 
 #define  MCU_SS_DDR        DDRB   /* Do not change */
 #define  MCU_SS_PORT       PORTB  /* Do not change */
 #define  MCU_SS            2      /* Do not change */
 
-#define  GENERAL_CALL      0x00   /* Do not change */
-#define  ACK_WAIT_MS       10     /* Do not change */
-#define  READ              0x01   /* Do not change */
-#define  WRITE             0x00   /* Do not change */
-#define  DOWN              0x02   /* Do not change */
-#define  RX                0x01   /* Do not change */
-#define  TX                0x00   /* Do not change */
-#define  NA                0x00   /* Do not change */
+#define  RF_GENERAL_CALL   0x00   /* Do not change */
+#define  RF_ACK_WAIT_MS    10     /* Do not change */
+#define  RF_REG_READ       0x01   /* Do not change */
+#define  RF_REG_WRITE      0x00   /* Do not change */
+#define  RF_MODE_PWR_DOWN  0x02   /* Do not change */
+#define  RF_MODE_RX        0x01   /* Do not change */
+#define  RF_MODE_TX        0x00   /* Do not change */
 #define  CRC_LSBYTE_POS    31     /* Do not change */
 #define  CRC_MSBYTE_POS    30     /* Do not change */
 #define  LEN_BYTE_POS      29     /* Do not change */
 #define  RX_ADDR_BYTE_POS  28     /* Do not change */
 #define  OWN_ADDR_BYTE_POS 27     /* Do not change */
 
-#define  CSN_LOW()         CSN_PORT&=~(1<<CSN)
-#define  CSN_HIGH()        CSN_PORT|=(1<<CSN)
-#define  CE_LOW()          CE_PORT&=~(1<<CE)
-#define  CE_HIGH()         CE_PORT|=(1<<CE)
+#define  RF_CSN_LOW()      RF_CSN_PORT&=~(1<<RF_CSN)
+#define  RF_CSN_HIGH()     RF_CSN_PORT|=(1<<RF_CSN)
+#define  RF_CE_LOW()       RF_CE_PORT&=~(1<<RF_CE)
+#define  RF_CE_HIGH()      RF_CE_PORT|=(1<<RF_CE)
 
-#define  RF_Enable()       SCK_DDR|=(1<<SCK);MISO_DDR&=~(1<<MISO);\
-                           MOSI_DDR|=(1<<MOSI);MCU_SS_DDR|=(1<<MCU_SS);\
-                           CSN_DDR|=(1<<CSN);CE_DDR|=(1<<CE);\
-			               CSN_PORT|=(1<<CSN);CE_PORT&=~(1<<CE);\
+#define  RF_Enable()       RF_SCK_DDR|=(1<<RF_SCK);RF_MISO_DDR&=~(1<<RF_MISO);\
+                           RF_MOSI_DDR|=(1<<RF_MOSI);MCU_SS_DDR|=(1<<MCU_SS);\
+                           RF_CSN_DDR|=(1<<RF_CSN);RF_CE_DDR|=(1<<RF_CE);\
+			               RF_CSN_PORT|=(1<<RF_CSN);RF_CE_PORT&=~(1<<RF_CE);\
 			               SPCR=(1<<SPE)|(1<<MSTR);SPSR=(1<<SPI2X);
 
-#define  RF_Disable()      SPCR=0x00;SCK_DDR|=(1<<SCK);\
-                           MISO_DDR|=(1<<MISO);MOSI_DDR|=(1<<MOSI);\
-			               MCU_SS_DDR|=(1<<MCU_SS);CSN_DDR|=(1<<CSN);\
-			               CE_DDR|=(1<<CE);\
-			               SCK_PORT&=~(1<<SCK);MISO_PORT&=~(1<<MISO);\
-			               MOSI_PORT&=~(1<<MOSI);MCU_SS_PORT&=~(1<<MCU_SS);\
-                           CSN_PORT&=~(1<<CSN);CE_PORT&=~(1<<CE);\
+#define  RF_Disable()      SPCR=0x00;RF_SCK_DDR|=(1<<RF_SCK);\
+                           RF_MISO_DDR|=(1<<RF_MISO);RF_MOSI_DDR|=(1<<RF_MOSI);\
+			               MCU_SS_DDR|=(1<<MCU_SS);RF_CSN_DDR|=(1<<RF_CSN);\
+			               RF_CE_DDR|=(1<<RF_CE);\
+			               RF_SCK_PORT&=~(1<<RF_SCK);RF_MISO_PORT&=~(1<<RF_MISO);\
+			               RF_MOSI_PORT&=~(1<<RF_MOSI);MCU_SS_PORT&=~(1<<MCU_SS);\
+                           RF_CSN_PORT&=~(1<<RF_CSN);RF_CE_PORT&=~(1<<RF_CE);\
 
 typedef struct{
 uint8_t tpid;
@@ -136,28 +135,28 @@ return crc;
 }
 
 void RF_RW_REG(uint8_t reg, uint8_t rw, uint8_t *data, uint8_t len){
-CSN_LOW();
+RF_CSN_LOW();
 if(rw==0){ reg|=0x20; SPI_TRX(reg);for(uint8_t i=0;i<len;i++){SPI_TRX(data[i]);}}
 else     { SPI_TRX(reg);for(uint8_t i=0;i<len;i++){data[i]=SPI_TRX(0xFF);}}
-CSN_HIGH();
+RF_CSN_HIGH();
 }
 
 void RF_PWR(uint8_t state){
 uint8_t buf[2];
-if     (state==DOWN){buf[0]=0x00;}
-else if(state==RX){buf[0]=0x73;CE_PORT|=(1<<CE);}
-else if(state==TX){buf[0]=0x72;CE_PORT&=~(1<<CE);}
-RF_RW_REG(0x00,WRITE,buf,1);
+if     (state==RF_MODE_PWR_DOWN){buf[0]=0x00;}
+else if(state==RF_MODE_RX){buf[0]=0x73;RF_CE_HIGH();}
+else if(state==RF_MODE_TX){buf[0]=0x72;RF_CE_LOW();}
+RF_RW_REG(0x00,RF_REG_WRITE,buf,1);
 }
 
 void RF_SLEEP(void){
-RF_PWR(DOWN);
+RF_PWR(RF_MODE_PWR_DOWN);
 RF_Disable();
 }
 
 void RF_WAKE_UP(void){
 RF_Enable();
-RF_PWR(RX);
+RF_PWR(RF_MODE_RX);
 }
 
 void RF_START(uint8_t channel){
@@ -175,45 +174,45 @@ for(uint8_t addr=0;addr<=0xE2;addr++){
   else if(addr==0x0B){addr=0x10;bytes=5;}
   else if(addr==0x11){addr=0xE1;bytes=0;}
   buf[0]=rf_config[index];
-  RF_RW_REG(addr,WRITE,buf,bytes);
+  RF_RW_REG(addr,RF_REG_WRITE,buf,bytes);
   index++;
  }
-RF_PWR(RX);
+RF_PWR(RF_MODE_RX);
 }
 
 
 
 uint8_t RF_TX(uint8_t *buf, uint8_t len, uint8_t rx_addr){
-RF_PWR(TX);
+RF_PWR(RF_MODE_TX);
 uint8_t  temp[32],temp_len=(len & 0x1F); uint16_t crc=0;
-RF_RW_REG(0xE1,WRITE,temp,0);
+RF_RW_REG(0xE1,RF_REG_WRITE,temp,0);
 for(uint8_t i=0;i<temp_len;i++){temp[i]=buf[i];}
-temp[OWN_ADDR_BYTE_POS]=OWN_ADDR;
+temp[OWN_ADDR_BYTE_POS]=RF_OWN_ADDR;
 temp[RX_ADDR_BYTE_POS]=rx_addr;temp[LEN_BYTE_POS]=len;
 for(uint8_t i=0;i<30;i++){crc=CRC16(crc,temp[i]);}
 temp[CRC_MSBYTE_POS]=(crc>>8);
 temp[CRC_LSBYTE_POS]=crc;
-RF_RW_REG(0xA0,WRITE,temp,32);
-CE_HIGH();
+RF_RW_REG(0xA0,RF_REG_WRITE,temp,32);
+RF_CE_HIGH();
 temp[0]=0;
-while(!(temp[0]&(1<<4))){RF_RW_REG(0x17,READ,temp,1);_delay_us(100);}
-CE_LOW();
+while(!(temp[0]&(1<<4))){RF_RW_REG(0x17,RF_REG_READ,temp,1);_delay_us(100);}
+RF_CE_LOW();
 return crc;
 }
 
 
 uint8_t RF_RX(uint8_t *buf, uint8_t *len, uint16_t timeout,uint8_t flush){
-RF_PWR(RX);
+RF_PWR(RF_MODE_RX);
 uint8_t dummy[2];
-if(flush){RF_RW_REG(0xE2,WRITE,dummy,0);}
+if(flush){RF_RW_REG(0xE2,RF_REG_WRITE,dummy,0);}
 uint16_t ticks=0,sts=0;
 
 while(ticks<timeout){
 sts=0; uint8_t temp[2]; uint16_t crc=0;
-RF_RW_REG(0x17,READ,temp,1);
+RF_RW_REG(0x17,RF_REG_READ,temp,1);
 if(!(temp[0] & 0x01))
     {
-       RF_RW_REG(0x61,READ,buf,32);
+       RF_RW_REG(0x61,RF_REG_READ,buf,32);
        for(uint8_t i=0;i<30;i++){crc=CRC16(crc,buf[i]);}
 	   uint16_t calc_crc=buf[CRC_MSBYTE_POS];
 	   calc_crc=calc_crc<<8;
@@ -233,8 +232,8 @@ if(rf.tpid>7){rf.tpid=0;}
 uint8_t sts=0,rty=0,temp_len=0,temp_pid=(rf.tpid<<5),rbuf[32];
 while(rty<retry){
   RF_TX(tbuf,tlen|temp_pid,rx_addr);
-  if(RF_RX(rbuf,&temp_len,(ACK_WAIT_MS*10),0)){
-    if((rbuf[RX_ADDR_BYTE_POS]==OWN_ADDR)&&(rf.tpid==(rbuf[LEN_BYTE_POS]>>5))){
+  if(RF_RX(rbuf,&temp_len,(RF_ACK_WAIT_MS*10),0)){
+    if((rbuf[RX_ADDR_BYTE_POS]==RF_OWN_ADDR)&&(rf.tpid==(rbuf[LEN_BYTE_POS]>>5))){
 	   sts=1;
 	   break;
 	   }
@@ -247,7 +246,7 @@ return sts;
 uint8_t RF_RX_ACK(uint8_t *rbuf, uint8_t *rlen){
 uint8_t sts=0,temp_len=0,temp_pid=0,tbuf[32],tlen=0;
 if(RF_RX(rbuf,&temp_len,1,0)){
-   if((rbuf[RX_ADDR_BYTE_POS]==OWN_ADDR)||(rbuf[RX_ADDR_BYTE_POS]==GENERAL_CALL)){
+   if((rbuf[RX_ADDR_BYTE_POS]==RF_OWN_ADDR)||(rbuf[RX_ADDR_BYTE_POS]==RF_GENERAL_CALL)){
      _delay_us(500);
      temp_pid=(rbuf[LEN_BYTE_POS] & 0xE0)>>5;
 	 *rlen=temp_len;
@@ -266,8 +265,8 @@ if(rf.tpid>7){rf.tpid=0;}
 uint8_t sts=0,rty=0,temp_len=0,temp_pid=(rf.tpid<<5);
 while(rty<retry){
   RF_TX(tbuf,tlen|temp_pid,rx_addr);
-  if(RF_RX(rbuf,&temp_len,(ACK_WAIT_MS*10),0)){
-    if((rbuf[RX_ADDR_BYTE_POS]==OWN_ADDR)&&(rf.tpid==(rbuf[LEN_BYTE_POS]>>5))){
+  if(RF_RX(rbuf,&temp_len,(RF_ACK_WAIT_MS*10),0)){
+    if((rbuf[RX_ADDR_BYTE_POS]==RF_OWN_ADDR)&&(rf.tpid==(rbuf[LEN_BYTE_POS]>>5))){
 	   *rlen=temp_len;
 	   sts=1;
 	   break;
@@ -282,7 +281,7 @@ return sts;
 uint8_t RF_RX_GET_ACK_PACKET(uint8_t *rbuf, uint8_t *rlen, uint8_t *tbuf, uint8_t tlen){
 uint8_t sts=0,temp_len=0,temp_pid=0;
 if(RF_RX(rbuf,&temp_len,1,0)){
-   if((rbuf[RX_ADDR_BYTE_POS]==OWN_ADDR)||(rbuf[RX_ADDR_BYTE_POS]==GENERAL_CALL)){
+   if((rbuf[RX_ADDR_BYTE_POS]==RF_OWN_ADDR)||(rbuf[RX_ADDR_BYTE_POS]==RF_GENERAL_CALL)){
      _delay_us(500);
      temp_pid=(rbuf[LEN_BYTE_POS] & 0xE0)>>5;
 	 *rlen=temp_len;
