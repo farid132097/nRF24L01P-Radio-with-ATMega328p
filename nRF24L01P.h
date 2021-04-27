@@ -226,37 +226,44 @@ return sts;
 }
 
 
-uint8_t RF_TX_ACK(uint8_t *tbuf, uint8_t tlen, uint8_t rx_addr,uint8_t retry){
+uint8_t RF_TX_ACK(uint8_t *tbuf, uint8_t tlen, uint8_t rx_addr,uint8_t ack_req, uint8_t retry){
 rf.tpid++;
 if(rf.tpid>7){rf.tpid=0;}
 uint8_t sts=0,rty=0,temp_len=0,temp_pid=(rf.tpid<<5),rbuf[32];
-while(rty<retry){
-  RF_TX(tbuf,tlen|temp_pid,rx_addr);
-  if(RF_RX(rbuf,&temp_len,(RF_ACK_WAIT_MS*10),0)){
-    if((rbuf[RX_ADDR_BYTE_POS]==RF_OWN_ADDR)&&(rf.tpid==(rbuf[LEN_BYTE_POS]>>5))){
-	   sts=1;
-	   break;
-	   }
-   }
-  else{rty++;}
+
+while(rty<retry)
+ {
+    RF_TX(tbuf,tlen|temp_pid,rx_addr);
+    if(RF_RX(rbuf,&temp_len,(RF_ACK_WAIT_MS*10),0))
+     {
+        if((rbuf[RX_ADDR_BYTE_POS]==RF_OWN_ADDR)&&(rf.tpid==(rbuf[LEN_BYTE_POS]>>5)))
+		 {
+	        sts=1;
+	        break;
+	     }
+     }
+    else{rty++;}
   }
 return sts;
 }
 
 uint8_t RF_RX_ACK(uint8_t *rbuf, uint8_t *rlen){
 uint8_t sts=0,temp_len=0,temp_pid=0,tbuf[32],tlen=0;
-if(RF_RX(rbuf,&temp_len,1,0)){
-   if((rbuf[RX_ADDR_BYTE_POS]==RF_OWN_ADDR)||(rbuf[RX_ADDR_BYTE_POS]==RF_GENERAL_CALL)){
-     _delay_us(500);
-     temp_pid=(rbuf[LEN_BYTE_POS] & 0xE0)>>5;
-	 *rlen=temp_len;
-	 RF_TX(tbuf,tlen|(temp_pid<<5),rbuf[OWN_ADDR_BYTE_POS]);
-	 if(temp_pid!=rf.rpid){sts=1;}
-	 rf.rpid=temp_pid;
+if(RF_RX(rbuf,&temp_len,1,0))
+ {
+    if((rbuf[RX_ADDR_BYTE_POS]==RF_OWN_ADDR)||(rbuf[RX_ADDR_BYTE_POS]==RF_GENERAL_CALL))
+	 {
+        _delay_us(500);
+        temp_pid=(rbuf[LEN_BYTE_POS] & 0xE0)>>5;
+	    *rlen=temp_len;
+	    RF_TX(tbuf,tlen|(temp_pid<<5),rbuf[OWN_ADDR_BYTE_POS]);
+	    if(temp_pid!=rf.rpid){sts=1;}
+	    rf.rpid=temp_pid;
 	 }
-   }
+ }
 return sts;
 }
+
 
 
 uint8_t RF_TX_GET_ACK_PACKET(uint8_t *tbuf, uint8_t tlen, uint8_t *rbuf, uint8_t *rlen, uint8_t rx_addr,uint8_t retry){
